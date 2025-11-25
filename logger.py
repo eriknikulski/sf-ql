@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import SupportsFloat, Optional
 
+from config import Config
+
 
 @dataclass
 class EpisodeStats:
@@ -10,12 +12,14 @@ class EpisodeStats:
 
 
 class Logger:
-    def __init__(self, name: str = __name__, log_interval: Optional[int] = 100, level: int = logging.INFO) -> None:
+    def __init__(self, name: str = __name__, log_interval: Optional[int] = None, level: Optional[int] = None) -> None:
+        self.config = Config()
         self.stats = []
-        self.log_interval = log_interval
+        self.log_interval = self.config.get_or_raise(log_interval, 'logger', 'log_interval')
+        self.level = self.config.get_or_raise(level, 'logger', 'level')
 
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
+        self.logger.setLevel(self.level)
         self.logger.propagate = False
         if not self.logger.handlers:
             handler = logging.StreamHandler()

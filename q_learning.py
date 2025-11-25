@@ -3,6 +3,7 @@ from typing import Optional
 import gymnasium as gym
 import numpy as np
 
+from config import Config
 from feature_extractor import MinigridFeaturesExtractor
 from logger import Logger
 
@@ -44,25 +45,27 @@ class QL:
     def __init__(
             self,
             env: gym.Env,
-            alpha: float = 0.1,
-            epsilon: float = 0.15,
-            epsilon_decay: float = 1.0,
-            epsilon_lower_bound: float = 0.1,
-            gamma: float = 0.95,
-            initial_z_value: float = 1e-4,
+            alpha: Optional[float] = None,
+            epsilon: Optional[float] = None,
+            epsilon_decay: Optional[float] = None,
+            epsilon_lower_bound: Optional[float] = None,
+            gamma: Optional[float] = None,
+            initial_z_value: Optional[float] = None,
     ) -> None:
+        self.config = Config()
         self.observation_space = env.observation_space
         self.action_space = env.action_space
         self.env = env
 
-        self.alpha = alpha
-        self.gamma = gamma
-        self.epsilon = epsilon
-        self.epsilon_decay = epsilon_decay
-        self.epsilon_lower_bound = epsilon_lower_bound
+        self.alpha = self.config.get_or_raise(alpha, 'q_learning', 'alpha')
+        self.epsilon = self.config.get_or_raise(epsilon, 'q_learning', 'epsilon')
+        self.epsilon_decay = self.config.get_or_raise(epsilon_decay, 'q_learning', 'epsilon_decay')
+        self.epsilon_lower_bound = self.config.get_or_raise(epsilon_lower_bound, 'q_learning', 'epsilon_lower_bound')
+        self.gamma = self.config.get_or_raise(gamma, 'q_learning', 'gamma')
+        self.initial_z_value = self.config.get_or_raise(initial_z_value, 'q_learning', 'initial_z_value')
 
-        feature_extractor = MinigridFeaturesExtractor(self.observation_space, rbf_max_grid_size=10)
-        z = np.full((self.action_space.n, feature_extractor.features_dim), fill_value=initial_z_value)
+        feature_extractor = MinigridFeaturesExtractor(self.observation_space)
+        z = np.full((self.action_space.n, feature_extractor.features_dim), fill_value=self.initial_z_value)
 
         self.Q = QFunction(
             feature_extractor=feature_extractor,

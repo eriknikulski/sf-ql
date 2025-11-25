@@ -1,0 +1,15 @@
+logger:
+  level: DEBUG
+  log_interval: 100
+
+q_learning:
+  alpha: 0.1
+  epsilon: 0.15
+  epsilon_decay: 1.0
+  epsilon_lower_bound: 0.1
+  gamma: 0.95
+  initial_z_value: 0.0001
+
+feature_extractor:
+  max_rbf_grid_size: 10
+  rbf_sigma: 0.1

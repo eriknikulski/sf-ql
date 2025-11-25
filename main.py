@@ -5,13 +5,13 @@ from logger import Logger
 from q_learning import QL
 
 
-def learn_policy(env: gym.Env, time_steps: int = 20_000):
+def learn_policy(env: gym.Env, time_steps: int):
     model = QL(env)
     model.learn(tasks=1, time_steps=time_steps)
     return model
 
 
-def execute_policy(env: gym.Env, policy, time_steps: int = 1_000):
+def eval_policy(env: gym.Env, policy, time_steps: int):
     logger = Logger(log_interval=None)
     logger.log_message('\nStarting evaluation...')
     logger.new_episode()
@@ -39,7 +39,7 @@ def main():
 
     policy = learn_policy(env, time_steps=100_000)
 
-    execute_policy(env, policy)
+    eval_policy(env, policy, time_steps=1_000)
 
     env.close()
 
