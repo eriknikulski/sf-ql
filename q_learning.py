@@ -96,7 +96,7 @@ class QL:
         self.epsilon_decay = epsilon_decay
         self.epsilon_lower_bound = epsilon_lower_bound
 
-        feature_extractor = MinigridFeaturesExtractor(self.observation_space)
+        feature_extractor = MinigridFeaturesExtractor(self.observation_space, rbf_max_grid_size=10)
         z = np.full((self.action_space.n, feature_extractor.features_dim), fill_value=initial_z_value)
 
         self.Q = QFunction(

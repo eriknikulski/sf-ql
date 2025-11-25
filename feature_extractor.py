@@ -4,7 +4,7 @@ import numpy as np
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
 
-def rbf_features(state, grid_size=10, sigma=0.1):
+def rbf_features(state, grid_size: int = 10, sigma: float = 0.1):
     """
     state: 1D array of length 2 (x,y)
     grid_size: number of centers per dimension
@@ -27,19 +27,18 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
     GOAL_VALUE = minigrid_constants.OBJECT_TO_IDX['goal']
     FEATURE_CONST = 1
 
-    def __init__(self, observation_space: gym.Space) -> None:
-
+    def __init__(self, observation_space: gym.Space, rbf_max_grid_size: int) -> None:
         width, height = observation_space['image'].shape[:-1]
         self.grid_size = max(width, height)
-        self.rbf_feature_grid_size = min(self.grid_size, 10)
+        self.rbf_grid_size = min(self.grid_size, rbf_max_grid_size)
 
-        features_dim = self.rbf_feature_grid_size**2 + 2 + 1
+        features_dim = self.rbf_grid_size ** 2 + 2 + 1
         super().__init__(observation_space, features_dim)
 
     def forward(self, observations):
         idx = np.argwhere(observations['image'] == self.AGENT_VALUE)[0][:-1]
         norm_agent_position = observations['image'][*idx][:-1] / self.grid_size
-        agent_pos_features = rbf_features(norm_agent_position, grid_size=self.rbf_feature_grid_size)
+        agent_pos_features = rbf_features(norm_agent_position, grid_size=self.rbf_grid_size)
 
         agent_direction_features = minigrid_constants.DIR_TO_VEC[observations['direction']]
 
