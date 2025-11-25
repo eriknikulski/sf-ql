@@ -1,6 +1,7 @@
 import gymnasium as gym
 from minigrid.wrappers import SymbolicObsWrapper
 
+from logger import Logger
 from q_learning import QL
 
 
@@ -11,13 +12,22 @@ def learn_policy(env: gym.Env, time_steps: int = 20_000):
 
 
 def execute_policy(env: gym.Env, policy, time_steps: int = 1_000):
+    logger = Logger(log_interval=None)
+    logger.log_message('\nStarting evaluation...')
+    logger.new_episode()
+
     observation, info = env.reset(seed=42)
+
     for _ in range(time_steps):
         action, _ = policy.predict(observation)
         observation, reward, terminated, truncated, info = env.step(action)
+        logger.log(reward=reward)
 
         if terminated or truncated:
             observation, info = env.reset()
+            logger.new_episode()
+
+    logger.print_stats()
 
 
 def main():

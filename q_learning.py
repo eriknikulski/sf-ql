@@ -1,45 +1,10 @@
-from typing import Optional, SupportsFloat, Union
+from typing import Optional
 
 import gymnasium as gym
 import numpy as np
 
 from feature_extractor import MinigridFeaturesExtractor
-
-
-class Logger:
-    def __init__(self, log_interval: Union[int, None] = 100) -> None:
-        self.stats = []
-        self.log_interval = log_interval
-
-    def new_episode(self) -> None:
-        if self.stats and self.log_interval is not None and len(self.stats) % self.log_interval == 0:
-            self.print_episode_stats()
-
-        self.stats.append({
-            'episode_reward': 0,
-            'steps': 0,
-        })
-
-    def log(self, reward: SupportsFloat) -> None:
-        self.stats[-1]['episode_reward'] += reward
-        self.stats[-1]['steps'] += 1
-
-    def print_episode_stats(self, index: int = -1) -> None:
-        n = len(self.stats)
-        episode_length = self.stats[index]['steps']
-        episode_reward = self.stats[index]['episode_reward']
-        print(f'Episode: {n} | Length {episode_length} | Reward {episode_reward:.3f}')
-
-    def print_stats(self):
-        _len = len(self.stats)
-        mean_episode_length = sum(entry['steps'] for entry in self.stats) / _len
-        mean_episode_reward = sum(entry['episode_reward'] for entry in self.stats) / _len
-        mean_episode_step_reward = sum(entry['episode_reward'] / entry['steps'] for entry in self.stats) / _len
-        print(f'\n\n'
-              f'{_len} episodes | '
-              f'Mean length {mean_episode_length} | '
-              f'Mean reward {mean_episode_reward:.3f} | '
-              f'Mean avg step reward {mean_episode_step_reward:.3f}')
+from logger import Logger
 
 
 class QFunction:
