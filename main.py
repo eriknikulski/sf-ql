@@ -1,13 +1,14 @@
 import gymnasium as gym
 from minigrid.wrappers import SymbolicObsWrapper
 
+from config import Config
 from logger import Logger
 from q_learning import QL
 
 
-def learn_policy(env: gym.Env, time_steps: int):
+def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
     model = QL(env)
-    model.learn(tasks=1, time_steps=time_steps)
+    model.learn(tasks=tasks, time_steps_per_task=time_steps_per_task)
     return model
 
 
@@ -31,13 +32,19 @@ def eval_policy(env: gym.Env, policy, time_steps: int):
 
 
 def main():
-    env_id = 'MiniGrid-Empty-5x5-v0'
-    # env_id = 'MiniGrid-FourRooms-v0'
+    config = Config()
+
+    # env_id = 'MiniGrid-Empty-5x5-v0'
+    env_id = 'MiniGrid-FourRooms-v0'
 
     env = gym.make(env_id, render_mode='rgb_array')
     env = SymbolicObsWrapper(env)
 
-    policy = learn_policy(env, time_steps=100_000)
+    policy = learn_policy(
+        env,
+        tasks=config.q_learning.tasks,
+        time_steps_per_task=config.q_learning.time_steps_per_task,
+    )
 
     eval_policy(env, policy, time_steps=1_000)
 

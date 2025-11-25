@@ -126,16 +126,16 @@ class QL:
 
         self.logger.print_stats()
 
-    def learn(self, tasks: int, time_steps: int) -> None:
+    def learn(self, tasks: int, time_steps_per_task: int) -> None:
         """
         Learning function for multitask Q-Learning
 
         :param tasks: number of tasks
-        :param time_steps: number of time steps
+        :param time_steps_per_task: number of time steps
         :return:
         """
         for i in range(tasks):
-            self.learn_task(time_steps)
+            self.learn_task(time_steps_per_task)
 
     def predict(self, state) -> tuple[int, None]:
         """

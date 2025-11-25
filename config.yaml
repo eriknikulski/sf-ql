@@ -9,6 +9,8 @@ q_learning:
   epsilon_lower_bound: 0.1
   gamma: 0.95
   initial_z_value: 0.0001
+  tasks: 1
+  time_steps_per_task: 20_000
 
 feature_extractor:
   max_rbf_grid_size: 10
