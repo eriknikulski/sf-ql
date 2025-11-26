@@ -21,3 +21,4 @@ q_learning:
 feature_extractor:
   max_rbf_grid_size: 3
   rbf_sigma: 0.1
+  include_goal: False

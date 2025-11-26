@@ -30,29 +30,71 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
     AGENT_VALUE = minigrid_constants.OBJECT_TO_IDX['agent']
     GOAL_VALUE = minigrid_constants.OBJECT_TO_IDX['goal']
     FEATURE_CONST = 1
+    BIAS_DIM = 1
+    AGENT_DIRECTION_DIMS = 2
 
     def __init__(
             self,
             observation_space: gym.Space,
             max_rbf_grid_size: Optional[int] = None,
             rbf_sigma: Optional[float] = None,
+            include_goal: Optional[bool] = None,
     ) -> None:
         self.config = Config()
 
         self.max_rbf_grid_size = self.config.get_or_raise(max_rbf_grid_size, 'feature_extractor', 'max_rbf_grid_size')
         self.rbf_sigma = self.config.get_or_raise(rbf_sigma, 'feature_extractor', 'rbf_sigma')
+        self.include_goal = self.config.get_or_raise(include_goal, 'feature_extractor', 'include_goal')
 
         self.grid_size = observation_space['image'].shape[:-1]
         self.rbf_grid_size = min(*self.grid_size, self.max_rbf_grid_size)
 
-        features_dim = self.rbf_grid_size ** 2 + 2 + 1
+        rbf_feature_dims = self.rbf_grid_size ** 2
+        if self.include_goal:
+            rbf_feature_dims *= 2
+        features_dim = rbf_feature_dims + self.AGENT_DIRECTION_DIMS + self.BIAS_DIM
         super().__init__(observation_space, features_dim)
 
-    def forward(self, observations):
-        idx = np.argwhere(observations['image'] == self.AGENT_VALUE)[0][:-1]
-        norm_agent_position = observations['image'][*idx][:-1] / self.grid_size
-        agent_pos_features = rbf_features(norm_agent_position, grid_size=self.rbf_grid_size, sigma=self.rbf_sigma)
+    def get_features(
+            self,
+            observations: dict,
+            obj_idx: int,
+            default_position: Optional[np.ndarray] = None,
+    ) -> np.ndarray | None:
+        matches = np.argwhere(observations['image'] == obj_idx)
 
-        agent_direction_features = minigrid_constants.DIR_TO_VEC[observations['direction']]
+        if len(matches) > 0:
+            position = matches[0][-1]
+        else:
+            position = default_position
 
-        return np.concatenate([[self.FEATURE_CONST], agent_pos_features, agent_direction_features])
+        if position is None:
+            return None
+
+        normalized_position = position / self.grid_size
+        pos_features = rbf_features(normalized_position, grid_size=self.rbf_grid_size, sigma=self.rbf_sigma)
+
+        return pos_features
+
+    def forward(self, observations: dict) -> np.ndarray:
+        # agent features
+        agent_pos = self.get_features(observations, self.AGENT_VALUE)
+        agent_direction = minigrid_constants.DIR_TO_VEC[observations['direction']]
+
+        # goal features
+        if self.include_goal:
+            goal_pos = self.get_features(observations, self.GOAL_VALUE)
+            if goal_pos is None:
+                goal_pos = agent_pos
+        else:
+            goal_pos = np.array([])
+
+        # combined features
+        features = np.concatenate([
+            [self.FEATURE_CONST],
+            agent_pos,
+            agent_direction,
+            goal_pos,
+        ])
+
+        return features
