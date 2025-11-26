@@ -117,9 +117,9 @@ class QL:
 
             if terminated or truncated:
                 gamma = 0
-                self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_lower_bound)
                 new_episode = True
 
+            self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_lower_bound)
             self.Q.update(state, action, float(reward), next_state, gamma=gamma)
 
             state = next_state
