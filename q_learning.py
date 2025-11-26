@@ -37,7 +37,9 @@ class QFunction:
     def get_action(self, state) -> int:
         state_features = self.feature_extractor(state)
         state_q_table = self.z @ state_features
-        action = np.argmax(state_q_table)
+
+        # argmax tie-breaking
+        action = int(np.argmax(state_q_table + 1e-8 * np.random.randn(len(state_q_table))))
         return action
 
 
