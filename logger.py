@@ -42,6 +42,11 @@ class Logger:
 
     def print_stats(self, last_n: Optional[int] = None) -> None:
         stats = self.stats[-last_n:] if last_n else self.stats
+
+        # remove an episode that was just started without any steps in it
+        if stats and stats[-1].steps == 0:
+            stats = stats[:-1]
+
         n = len(stats)
 
         preamble = '\n' if n == len(self.stats) else ''
