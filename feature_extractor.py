@@ -22,7 +22,7 @@ def rbf_features(state, grid_size: int = 10, sigma: float = 0.1):
     # compute RBF outputs
     diffs = centers - state
     sq_norms = np.sum(diffs ** 2, axis=1)
-    features = np.exp(-sq_norms / (sigma ** 2))
+    features = np.exp(-sq_norms / sigma)
     return features
 
 
