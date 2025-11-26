@@ -5,6 +5,8 @@ logger:
 setting:
   env_id: MiniGrid-Empty-5x5-v0
 #  env_id: MiniGrid-FourRooms-v0
+  render_mode: rgb_array
+  eval_steps: 1_000
 
 q_learning:
   alpha: 0.0005

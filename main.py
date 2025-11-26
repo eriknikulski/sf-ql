@@ -35,8 +35,9 @@ def main():
     config = Config()
 
     env_id = config.setting.env_id
+    render_mode = config.setting.render_mode
 
-    env = gym.make(env_id, render_mode='rgb_array')
+    env = gym.make(env_id, render_mode=render_mode)
     env = SymbolicObsWrapper(env)
 
     policy = learn_policy(
@@ -45,7 +46,8 @@ def main():
         time_steps_per_task=config.q_learning.time_steps_per_task,
     )
 
-    eval_policy(env, policy, time_steps=1_000)
+    eval_steps = config.setting.eval_steps
+    eval_policy(env, policy, time_steps=eval_steps)
 
     env.close()
 
