@@ -9,17 +9,39 @@ from logger import Logger
 
 
 class QFunction:
-    def __init__(self, feature_extractor, z, alpha, gamma) -> None:
+    def __init__(
+            self,
+            feature_extractor: MinigridFeaturesExtractor,
+            action_space_size: int,
+            initial_q_value: float,
+            alpha: float,
+            gamma: float,
+    ) -> None:
         self.feature_extractor = feature_extractor
-        self.z = z
-
+        self.action_space_size = action_space_size
+        self.initial_q_value = initial_q_value
         self.alpha = alpha
         self.gamma = gamma
+
+        self.z = None
+        self._init_z()
 
     def __getitem__(self, key) -> None:
         state, action = key
         state_features = self.feature_extractor(state)
         return state_features @ self.z[action]
+
+    def _init_z(self) -> None:
+        self.z = np.full(
+            shape=(self.action_space_size, self.feature_extractor.features_dim),
+            fill_value=self.initial_q_value,
+        )
+
+    def task_init(self, task: int) -> None:
+        self._init_z()
+
+    def step_init(self, step: int) -> None:
+        pass
 
     def update(self, state, action, reward, next_state, gamma: Optional[float] = None) -> None:
         gamma = gamma or self.gamma
@@ -52,7 +74,7 @@ class QL:
             epsilon_decay: Optional[float] = None,
             epsilon_lower_bound: Optional[float] = None,
             gamma: Optional[float] = None,
-            initial_z_value: Optional[float] = None,
+            initial_q_value: Optional[float] = None,
     ) -> None:
         self.config = Config()
         self.observation_space = env.observation_space
@@ -64,16 +86,14 @@ class QL:
         self.epsilon_decay = self.config.get_or_raise(epsilon_decay, 'q_learning', 'epsilon_decay')
         self.epsilon_lower_bound = self.config.get_or_raise(epsilon_lower_bound, 'q_learning', 'epsilon_lower_bound')
         self.gamma = self.config.get_or_raise(gamma, 'q_learning', 'gamma')
-        self.initial_z_value = self.config.get_or_raise(initial_z_value, 'q_learning', 'initial_z_value')
+        self.initial_q_value = self.config.get_or_raise(initial_q_value, 'q_learning', 'initial_q_value')
 
         self.use_sf_paper_reward = self.config.setting.use_sf_paper_reward
 
-        feature_extractor = MinigridFeaturesExtractor(self.observation_space)
-        z = np.full((self.action_space.n, feature_extractor.features_dim), fill_value=self.initial_z_value)
-
         self.Q = QFunction(
-            feature_extractor=feature_extractor,
-            z=z,
+            feature_extractor=MinigridFeaturesExtractor(self.observation_space),
+            action_space_size=self.action_space.n,
+            initial_q_value=self.initial_q_value,
             alpha=self.alpha,
             gamma=self.gamma,
         )
@@ -96,23 +116,28 @@ class QL:
             action = self.Q.get_action(state)
         return action
 
-    def learn_task(self, time_steps: int) -> None:
+    def learn_task(self, task: int, time_steps: int) -> None:
         """
         Learning function for Q-Learning
 
+        :param task: task id
         :param time_steps: number of time steps
         :return:
         """
         new_episode = True
         state, _ = self.env.reset()
 
-        for i in range(time_steps):
+        self.Q.task_init(task)
+
+        for step in range(time_steps):
             gamma = self.gamma
 
             if new_episode:
                 new_episode = False
                 state, _ = self.env.reset()
                 self.logger.new_episode()
+
+            self.Q.step_init(step)
 
             action = self.get_epsilon_greedy_action(state)
 
@@ -125,8 +150,10 @@ class QL:
                 gamma = 0
                 new_episode = True
 
-            self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_lower_bound)
             self.Q.update(state, action, float(reward), next_state, gamma=gamma)
+
+            # decay parameter
+            self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_lower_bound)
 
             state = next_state
 
@@ -140,8 +167,8 @@ class QL:
         :param time_steps_per_task: number of time steps
         :return:
         """
-        for i in range(tasks):
-            self.learn_task(time_steps_per_task)
+        for task in range(tasks):
+            self.learn_task(task, time_steps_per_task)
 
     def predict(self, state) -> tuple[int, None]:
         """
