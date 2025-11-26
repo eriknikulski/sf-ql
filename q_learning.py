@@ -115,6 +115,7 @@ class QL:
             action = self.get_epsilon_greedy_action(state)
 
             next_state, reward, terminated, truncated, info = self.env.step(action)
+            reward = float(reward > 0)  # align with the SF paper; reward of 1 for reaching goal
             self.logger.log(reward=reward)
 
             if terminated or truncated:
