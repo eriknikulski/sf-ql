@@ -50,13 +50,16 @@ class Logger:
         n = len(stats)
 
         preamble = '\n' if n == len(self.stats) else ''
-        mean_episode_length = sum(entry.steps for entry in stats) / n
-        median_episode_length = np.median(np.array([entry.steps for entry in stats]))
+
+        steps = np.array([entry.steps for entry in stats])
+        mean_episode_length = np.mean(steps)
+        std_episode_length = np.std(steps)
+        median_episode_length = np.median(steps)
         mean_episode_reward = sum(entry.episode_reward for entry in stats) / n
 
         self.logger.info(f'{preamble}'
               f'Last {n} episodes: '
-              f'Mean length {mean_episode_length:.2f} | '
+              f'Mean length {mean_episode_length:.2f}±{std_episode_length:.2f} | '
               f'Median length {median_episode_length:.2f} | '
               f'Mean reward {mean_episode_reward:.3f}')
 
