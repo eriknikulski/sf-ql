@@ -1,5 +1,7 @@
 import logging
 from dataclasses import dataclass
+
+import numpy as np
 from typing import SupportsFloat, Optional
 
 from config import Config
@@ -44,11 +46,13 @@ class Logger:
 
         preamble = '\n' if n == len(self.stats) else ''
         mean_episode_length = sum(entry.steps for entry in stats) / n
+        median_episode_length = np.median(np.array([entry.steps for entry in stats]))
         mean_episode_reward = sum(entry.episode_reward for entry in stats) / n
 
         self.logger.info(f'{preamble}'
               f'Last {n} episodes: '
               f'Mean length {mean_episode_length:.2f} | '
+              f'Median length {median_episode_length:.2f} | '
               f'Mean reward {mean_episode_reward:.3f}')
 
     def log_message(self, message: str) -> None:
