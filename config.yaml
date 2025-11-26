@@ -7,6 +7,7 @@ setting:
 #  env_id: MiniGrid-FourRooms-v0
   render_mode: rgb_array
   eval_steps: 1_000
+  use_sf_paper_reward: True   # 1 if goal reached
 
 q_learning:
   alpha: 0.0005

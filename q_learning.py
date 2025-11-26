@@ -66,6 +66,8 @@ class QL:
         self.gamma = self.config.get_or_raise(gamma, 'q_learning', 'gamma')
         self.initial_z_value = self.config.get_or_raise(initial_z_value, 'q_learning', 'initial_z_value')
 
+        self.use_sf_paper_reward = self.config.setting.use_sf_paper_reward
+
         feature_extractor = MinigridFeaturesExtractor(self.observation_space)
         z = np.full((self.action_space.n, feature_extractor.features_dim), fill_value=self.initial_z_value)
 
@@ -115,7 +117,8 @@ class QL:
             action = self.get_epsilon_greedy_action(state)
 
             next_state, reward, terminated, truncated, info = self.env.step(action)
-            reward = float(reward > 0)  # align with the SF paper; reward of 1 for reaching goal
+            if self.use_sf_paper_reward:
+                reward = float(reward > 0)
             self.logger.log(reward=reward)
 
             if terminated or truncated:
