@@ -1,11 +1,15 @@
 logger:
   level: DEBUG
-  log_interval: 100
+  log_interval: 10
+
+setting:
+  env_id: MiniGrid-Empty-5x5-v0
+#  env_id: MiniGrid-FourRooms-v0
 
 q_learning:
-  alpha: 0.1
+  alpha: 0.0005
   epsilon: 0.15
-  epsilon_decay: 1.0
+  epsilon_decay: 0.999
   epsilon_lower_bound: 0.1
   gamma: 0.95
   initial_z_value: 0.0001
@@ -13,5 +17,5 @@ q_learning:
   time_steps_per_task: 20_000
 
 feature_extractor:
-  max_rbf_grid_size: 10
+  max_rbf_grid_size: 3
   rbf_sigma: 0.1

@@ -34,8 +34,7 @@ def eval_policy(env: gym.Env, policy, time_steps: int):
 def main():
     config = Config()
 
-    # env_id = 'MiniGrid-Empty-5x5-v0'
-    env_id = 'MiniGrid-FourRooms-v0'
+    env_id = config.setting.env_id
 
     env = gym.make(env_id, render_mode='rgb_array')
     env = SymbolicObsWrapper(env)
