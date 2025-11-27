@@ -40,7 +40,7 @@ class QFunction:
     def task_init(self, task: int) -> None:
         self._init_z()
 
-    def step_init(self, step: int) -> None:
+    def step_init(self, state: np.ndarray, step: int) -> None:
         pass
 
     def update(self, state, action, reward, next_state, gamma: Optional[float] = None) -> None:
@@ -137,7 +137,7 @@ class QL:
                 state, _ = self.env.reset()
                 self.logger.new_episode()
 
-            self.Q.step_init(step)
+            self.Q.step_init(state, step)
 
             action = self.get_epsilon_greedy_action(state)
 
