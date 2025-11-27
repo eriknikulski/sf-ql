@@ -37,8 +37,9 @@ def main():
 
     env_id = config.setting.env_id
     render_mode = config.setting.render_mode
+    max_episode_steps = config.setting.max_episode_steps
 
-    env = gym.make(env_id, render_mode=render_mode)
+    env = gym.make(env_id, max_episode_steps=max_episode_steps, render_mode=render_mode)
     env = SymbolicObsWrapper(env)
 
     policy = learn_policy(

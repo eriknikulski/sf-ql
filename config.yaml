@@ -9,6 +9,7 @@ setting:
 #  render_mode: human
   eval_steps: 1_000
   use_sf_paper_reward: True   # 1 if goal reached
+  max_episode_steps: 20
   tasks: 1
   time_steps_per_task: 20_000
 
