@@ -125,7 +125,7 @@ class QL:
         :return:
         """
         new_episode = True
-        state, _ = self.env.reset()
+        state, _ = self.env.reset(seed=task)
 
         self.Q.task_init(task)
 
@@ -134,7 +134,7 @@ class QL:
 
             if new_episode:
                 new_episode = False
-                state, _ = self.env.reset()
+                state, _ = self.env.reset(seed=task)
                 self.logger.new_episode()
 
             self.Q.step_init(state, step)

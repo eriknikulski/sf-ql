@@ -17,6 +17,7 @@ def eval_policy(env: gym.Env, policy, time_steps: int):
     logger.log_message('\nStarting evaluation...')
     logger.new_episode()
 
+    # TODO: think about which task the evaluation should run
     observation, info = env.reset(seed=42)
 
     for _ in range(time_steps):
