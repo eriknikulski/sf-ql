@@ -14,3 +14,7 @@ Episode: 2100 | Length 6 | Reward 0.946
 
 2135 episodes | Mean length 46.8384074941452 | Mean reward 0.550 | Mean avg step reward 0.049
 ```
+
+# SF paper: SF Q-learning implementation
+
+Note: each task is specified by its index and used by env.reset(seed=task)

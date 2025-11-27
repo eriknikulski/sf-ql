@@ -6,6 +6,7 @@ setting:
   env_id: MiniGrid-Empty-5x5-v0
 #  env_id: MiniGrid-FourRooms-v0
   render_mode: rgb_array
+#  render_mode: human
   eval_steps: 1_000
   use_sf_paper_reward: True   # 1 if goal reached
   tasks: 1
@@ -18,6 +19,16 @@ q_learning:
   epsilon_lower_bound: 0.1
   gamma: 0.95
   initial_q_value: 0.0001
+
+sfq_learning:
+  alpha: 0.0005
+  alpha_w: 0.01
+  epsilon: 0.15
+  epsilon_decay: 0.999
+  epsilon_lower_bound: 0.1
+  gamma: 0.95
+  initial_q_value: 0.0001
+  initial_w_value: 0.0001
 
 feature_extractor:
   max_rbf_grid_size: 3
