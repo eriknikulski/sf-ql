@@ -69,6 +69,8 @@ class QL:
     def __init__(
             self,
             env: gym.Env,
+            tasks: int,
+            time_steps_per_task: int,
             alpha: Optional[float] = None,
             epsilon: Optional[float] = None,
             epsilon_decay: Optional[float] = None,
@@ -80,6 +82,8 @@ class QL:
         self.observation_space = env.observation_space
         self.action_space = env.action_space
         self.env = env
+        self.tasks = tasks
+        self.time_steps_per_task = time_steps_per_task
 
         self.alpha = self.config.get_or_raise(alpha, 'q_learning', 'alpha')
         self.epsilon = self.config.get_or_raise(epsilon, 'q_learning', 'epsilon')
@@ -159,16 +163,14 @@ class QL:
 
         self.logger.print_stats()
 
-    def learn(self, tasks: int, time_steps_per_task: int) -> None:
+    def learn(self) -> None:
         """
         Learning function for multitask Q-Learning
 
-        :param tasks: number of tasks
-        :param time_steps_per_task: number of time steps
         :return:
         """
-        for task in range(tasks):
-            self.learn_task(task, time_steps_per_task)
+        for task in range(self.tasks):
+            self.learn_task(task, self.time_steps_per_task)
 
     def predict(self, state) -> tuple[int, None]:
         """

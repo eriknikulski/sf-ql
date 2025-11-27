@@ -7,8 +7,8 @@ from q_learning import QL
 
 
 def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
-    model = QL(env)
-    model.learn(tasks=tasks, time_steps_per_task=time_steps_per_task)
+    model = QL(env, tasks=tasks, time_steps_per_task=time_steps_per_task)
+    model.learn()
     return model
 
 
@@ -43,8 +43,8 @@ def main():
 
     policy = learn_policy(
         env,
-        tasks=config.q_learning.tasks,
-        time_steps_per_task=config.q_learning.time_steps_per_task,
+        tasks=config.setting.tasks,
+        time_steps_per_task=config.setting.time_steps_per_task,
     )
 
     eval_steps = config.setting.eval_steps
