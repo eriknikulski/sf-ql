@@ -58,9 +58,9 @@ class NonDirectionWrapper(Wrapper):
             turn_reward += _reward
             terminated = terminated or _terminated
             truncated = truncated or _truncated
-        elif delta > 0:
+        elif delta != 0:
             # turn left according to delta
-            for _ in range(delta):
+            for _ in range(abs(delta)):
                 _obs, _reward, _terminated, _truncated, _info = self.env.step(self.minigrid_env.actions.left)
                 turn_reward += _reward
                 terminated = terminated or _terminated
