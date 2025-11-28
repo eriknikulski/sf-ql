@@ -146,6 +146,8 @@ class SFQFunction(QFunction):
         :param state: Current state
         :return: task with highest Q-value
         """
+        if self.tasks == 1:
+            return 0
         best_value = None
         best_tasks = []
 
