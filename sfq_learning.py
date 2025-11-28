@@ -22,7 +22,7 @@ class Phi:
         self.embedding_size = 1
 
     def __call__(self, state: dict, action: int, next_state: dict) -> np.ndarray:
-        matches = np.argwhere(state['image'] == self.GOAL_VALUE)
+        matches = np.argwhere(next_state['image'] == self.GOAL_VALUE)
         agent_on_goal = len(matches) == 0
 
         return np.array([int(agent_on_goal)])
