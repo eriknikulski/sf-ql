@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import gymnasium as gym
 import numpy as np
