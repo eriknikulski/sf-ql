@@ -26,10 +26,9 @@ class QFunction:
         self.z = None
         self._init_z()
 
-    def __getitem__(self, key) -> None:
+    def __getitem__(self, key: Tuple[dict, int]) -> None:
         state, action = key
-        state_features = self.feature_extractor(state)
-        return state_features @ self.z[action]
+        return self.feature_extractor(state) @ self.z[action]
 
     def _init_z(self) -> None:
         self.z = np.full(
