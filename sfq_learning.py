@@ -202,32 +202,29 @@ class SFQFunction(QFunction):
         :return: action, task in which the action was chosen
         """
         best_value = None
-        best_tasks = []
-        best_actions = [None]
+        best = []
 
         state_features = self.feature_extractor(state)
 
         # find best actions and tasks
         for task in range(min(self.task + 1, self.tasks)):
             state_q_values = self.Z[task] @ self.w[self.task] @ state_features
-            action = np.argmax(state_q_values)
-            value = state_q_values[action]
-
-            if best_value is None or value > best_value:
-                best_value = value
-                best_tasks = [task]
-                best_actions = [action]
-            elif value == best_value:
-                best_tasks.append(task)
-                best_actions.append(action)
+            actions = np.argwhere(state_q_values == np.amax(state_q_values))
+            if actions.size > 0:
+                value = state_q_values[actions[0][0]]
+                if best_value is None or value > best_value:
+                    best = list(zip(actions.flatten(), [task] * actions.size))
+                    best_value = value
+                elif value == best_value:
+                    best.extend(list(zip(actions.flatten(), [task] * actions.size)))
 
         # break ties arbitrarily
-        if len(best_tasks) > 1:
-            idx = np.random.randint(len(best_tasks))
+        if len(best) > 1:
+            idx = np.random.randint(len(best))
         else:
             idx = 0
 
-        return best_actions[idx], best_tasks[idx]
+        return best[idx]
 
 
 class SFQL(QL):
