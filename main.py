@@ -2,6 +2,7 @@ import gymnasium as gym
 from minigrid.wrappers import SymbolicObsWrapper
 
 from config import Config
+from wrappers import NonDirectionWrapper
 from logger import Logger
 from q_learning import QL
 
@@ -41,6 +42,7 @@ def main():
 
     env = gym.make(env_id, max_episode_steps=max_episode_steps, render_mode=render_mode)
     env = SymbolicObsWrapper(env)
+    env = NonDirectionWrapper(env)
 
     policy = learn_policy(
         env,
