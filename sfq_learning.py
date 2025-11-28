@@ -126,7 +126,7 @@ class SFQFunction(QFunction):
         self.w[self.task] += self.alpha_w * (reward - phi_vec @ self.w[self.task]) * phi_vec
 
         # update Z[t, a]
-        next_action = self.get_best_action(next_state)
+        next_action, _ = self.get_best_action(next_state)
         self._td_update_Z(self.task, state, action, next_state, next_action, gamma)
 
         if self.current_best_task != self.task:
