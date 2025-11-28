@@ -8,11 +8,12 @@ from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from config import Config
 
 
-def rbf_features(state, grid_size: int = 10, sigma: float = 0.1):
+def rbf_features(position, grid_size: int = 10, sigma: float = 0.1) -> np.ndarray:
     """
-    state: 1D array of length 2 (x,y)
-    grid_size: number of centers per dimension
-    sigma: width of Gaussian
+    :param: position: 1D array of length 2 (x,y)
+    :param: grid_size: number of centers per dimension
+    :param: sigma: width of Gaussian
+    :return: feature 1D array of length grid_size * grid_size
     """
     x = np.linspace(0, 1, grid_size)
     y = np.linspace(0, 1, grid_size)
@@ -20,7 +21,7 @@ def rbf_features(state, grid_size: int = 10, sigma: float = 0.1):
     centers = np.stack([xx.ravel(), yy.ravel()], axis=1)  # shape (grid_size^2, 2)
 
     # compute RBF outputs
-    diffs = centers - state
+    diffs = centers - position
     sq_norms = np.sum(diffs ** 2, axis=1)
     features = np.exp(-sq_norms / sigma)
     return features
