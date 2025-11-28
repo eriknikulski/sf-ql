@@ -86,7 +86,7 @@ class SFQFunction(QFunction):
     def step_init(self, state: dict, step: int) -> None:
         self.current_best_task = self.get_best_task(state)
 
-    def psi(self, state: dict, action: int, task: Optional[int] = None) -> float:
+    def psi(self, state: dict, action: int, task: Optional[int] = None) -> np.ndarray:
         if task is None:
             task = self.task
 
