@@ -69,7 +69,7 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
         matches = np.argwhere(observations['image'] == obj_idx)
 
         if len(matches) > 0:
-            position = matches[0][-1]
+            position = matches[0][:-1]
         else:
             position = default_position
 
