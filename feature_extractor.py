@@ -67,7 +67,10 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
             obj_idx: int,
             default_position: Optional[np.ndarray] = None,
     ) -> np.ndarray | None:
-        matches = np.argwhere(observations['image'] == obj_idx)
+        # remove walls around observation; Note: assumes env is fully observable
+        state = observations['image'][1:-1, 1:-1]
+
+        matches = np.argwhere(state == obj_idx)
 
         if len(matches) > 0:
             position = matches[0][:-1]
