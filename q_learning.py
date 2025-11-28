@@ -40,10 +40,17 @@ class QFunction:
     def task_init(self, task: int) -> None:
         self._init_z()
 
-    def step_init(self, state: np.ndarray, step: int) -> None:
+    def step_init(self, state: dict, step: int) -> None:
         pass
 
-    def update(self, state, action, reward, next_state, gamma: Optional[float] = None) -> None:
+    def update(
+            self,
+            state: dict,
+            action: int,
+            reward: float,
+            next_state: dict,
+            gamma: Optional[float] = None,
+    ) -> None:
         gamma = gamma or self.gamma
         state_features = self.feature_extractor(state)
         next_state_features = self.feature_extractor(next_state)
@@ -56,7 +63,7 @@ class QFunction:
         td_error = td_target - current_value
         self.z[action] += self.alpha * td_error * state_features
 
-    def get_action(self, state) -> int:
+    def get_action(self, state: dict) -> int:
         state_features = self.feature_extractor(state)
         state_q_table = self.z @ state_features
 
@@ -104,7 +111,7 @@ class QL:
 
         self.logger = Logger()
 
-    def get_epsilon_greedy_action(self, state: np.ndarray, epsilon: Optional[float] = None) -> int:
+    def get_epsilon_greedy_action(self, state: dict, epsilon: Optional[float] = None) -> int:
         """
         Returns an epsilon-greedy action
 
@@ -172,7 +179,7 @@ class QL:
         for task in range(self.tasks):
             self.learn_task(task, self.time_steps_per_task)
 
-    def predict(self, state) -> tuple[int, None]:
+    def predict(self, state: dict) -> tuple[int, None]:
         """
         Predict the action given a state
 

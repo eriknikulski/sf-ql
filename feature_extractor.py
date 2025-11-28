@@ -8,7 +8,7 @@ from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from config import Config
 
 
-def rbf_features(position, grid_size: int = 10, sigma: float = 0.1) -> np.ndarray:
+def rbf_features(position: np.ndarray, grid_size: int = 10, sigma: float = 0.1) -> np.ndarray:
     """
     :param: position: 1D array of length 2 (x,y)
     :param: grid_size: number of centers per dimension
@@ -64,12 +64,12 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
 
     def get_features(
             self,
-            observations: dict,
+            state: dict,
             obj_idx: int,
             default_position: Optional[np.ndarray] = None,
     ) -> np.ndarray | None:
         # remove walls around observation; Note: assumes env is fully observable
-        state = observations['image'][1:-1, 1:-1]
+        state = state['image'][1:-1, 1:-1]
 
         matches = np.argwhere(state == obj_idx)
 
@@ -86,19 +86,19 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
 
         return pos_features
 
-    def forward(self, observations: dict) -> np.ndarray:
+    def forward(self, state: dict) -> np.ndarray:
         # agent features
-        agent_pos = self.get_features(observations, self.AGENT_VALUE)
+        agent_pos = self.get_features(state, self.AGENT_VALUE)
 
         # agent direction features
         if self.include_direction:
-            agent_direction = minigrid_constants.DIR_TO_VEC[observations['direction']]
+            agent_direction = minigrid_constants.DIR_TO_VEC[state['direction']]
         else:
             agent_direction = np.array([])
 
         # goal features
         if self.include_goal:
-            goal_pos = self.get_features(observations, self.GOAL_VALUE)
+            goal_pos = self.get_features(state, self.GOAL_VALUE)
             if goal_pos is None:
                 goal_pos = agent_pos
         else:

@@ -21,7 +21,7 @@ class Phi:
     def __init__(self) -> None:
         self.embedding_size = 1
 
-    def __call__(self, state: np.ndarray, action: int, next_state: np.ndarray) -> np.ndarray:
+    def __call__(self, state: dict, action: int, next_state: dict) -> np.ndarray:
         matches = np.argwhere(state['image'] == self.GOAL_VALUE)
         agent_on_goal = len(matches) == 0
 
@@ -84,16 +84,24 @@ class SFQFunction(QFunction):
         self.task = task
         self._init_Z(task)
 
-    def step_init(self, state: np.ndarray, step: int) -> None:
+    def step_init(self, state: dict, step: int) -> None:
         self.current_best_task = self.get_best_task(state)
 
-    def psi(self, state: int, action: int, task: Optional[int] = None) -> float:
+    def psi(self, state: dict, action: int, task: Optional[int] = None) -> float:
         if task is None:
             task = self.task
 
         return self.feature_extractor(state) @ self.Z[task, action]
 
-    def _td_update_Z(self, task, state, action, next_state, next_action, gamma) -> None:
+    def _td_update_Z(
+            self,
+            task: int,
+            state: dict,
+            action: int,
+            next_state: dict,
+            next_action: int,
+            gamma: float,
+    ) -> None:
         state_features = self.feature_extractor(state)
         phi_vec = self.phi(state, action, next_state)
 
@@ -104,7 +112,10 @@ class SFQFunction(QFunction):
 
     def update(
             self,
-            state, action, reward, next_state,
+            state: dict,
+            action: int,
+            reward: float,
+            next_state: dict,
             gamma: Optional[float] = None,
     ) -> None:
         if gamma is None:
@@ -128,7 +139,7 @@ class SFQFunction(QFunction):
             )
             self._td_update_Z(self.current_best_task, state, action, next_state, next_action, gamma)
 
-    def get_best_task(self, state: np.ndarray) -> int:
+    def get_best_task(self, state: dict) -> int:
         """
         Get the task that has the highest Q-value for the state and the current task description.
         Considered tasks are from 0 to (including) {max_task}.
@@ -160,7 +171,7 @@ class SFQFunction(QFunction):
 
         return best_tasks[idx]
 
-    def get_action(self, state, task_psi: Optional[int] = None, task_weight: Optional[int] = None) -> int:
+    def get_action(self, state: dict, task_psi: Optional[int] = None, task_weight: Optional[int] = None) -> int:
         """
         Gets the best action for the provided task or (fallback) for the current best task,
         calculated at the beginning of the step.
@@ -182,7 +193,7 @@ class SFQFunction(QFunction):
         action = int(np.argmax(state_q_table + 1e-8 * np.random.randn(len(state_q_table))))
         return action
 
-    def get_best_action(self, state: np.ndarray) -> Tuple[int, int]:
+    def get_best_action(self, state: dict) -> Tuple[int, int]:
         """
         Get the best action over all tasks given a state and the current task description w
 
