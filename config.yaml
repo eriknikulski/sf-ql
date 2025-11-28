@@ -22,14 +22,14 @@ q_learning:
   initial_q_value: 0.0001
 
 sfq_learning:
-  alpha: 0.0005
+  alpha: 0.01
   alpha_w: 0.01
   epsilon: 0.15
-  epsilon_decay: 0.999
+  epsilon_decay: 1.0
   epsilon_lower_bound: 0.1
   gamma: 0.95
-  initial_q_value: 0.0001
-  initial_w_value: 0.0001
+  initial_q_value: 0.01
+  initial_w_value: 0.01
 
 feature_extractor:
   max_rbf_grid_size: 3

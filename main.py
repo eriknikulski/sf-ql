@@ -5,10 +5,11 @@ from config import Config
 from wrappers import NonDirectionWrapper
 from logger import Logger
 from q_learning import QL
+from sfq_learning import SFQL
 
 
 def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
-    model = QL(env, tasks=tasks, time_steps_per_task=time_steps_per_task)
+    model = SFQL(env, tasks=tasks, time_steps_per_task=time_steps_per_task)
     model.learn()
     return model
 
