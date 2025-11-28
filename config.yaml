@@ -11,12 +11,12 @@ setting:
   use_sf_paper_reward: True   # 1 if goal reached
   max_episode_steps: 20
   tasks: 1
-  time_steps_per_task: 20_000
+  time_steps_per_task: 1_000
 
 q_learning:
-  alpha: 0.0005
-  epsilon: 0.15
-  epsilon_decay: 0.999
+  alpha: 0.001
+  epsilon: 1.0
+  epsilon_decay: 0.9
   epsilon_lower_bound: 0.1
   gamma: 0.95
   initial_q_value: 0.0001
