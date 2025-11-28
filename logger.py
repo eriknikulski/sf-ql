@@ -17,7 +17,7 @@ class Logger:
     def __init__(self, name: str = __name__, log_interval: Optional[int] = None, level: Optional[int] = None) -> None:
         self.config = Config()
         self.stats = []
-        self.log_interval = self.config.get_or_raise(log_interval, 'logger', 'log_interval')
+        self.log_interval = log_interval or self.config.logger.log_interval     # None is a valid value
         self.level = self.config.get_or_raise(level, 'logger', 'level')
 
         self.logger = logging.getLogger(name)

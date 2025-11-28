@@ -14,7 +14,8 @@ def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
 
 
 def eval_policy(env: gym.Env, policy, time_steps: int):
-    logger = Logger(log_interval=None)
+    logger = Logger()
+    logger.log_interval = None
     logger.log_message('\nStarting evaluation...')
     logger.new_episode()
 
