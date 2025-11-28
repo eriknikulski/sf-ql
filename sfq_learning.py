@@ -58,9 +58,9 @@ class SFQFunction(QFunction):
         self.w = None
         self._init_w()
 
-    def __getitem__(self, key: Tuple[dict, int]) -> None:
+    def __getitem__(self, key: Tuple[dict, int]) -> float:
         state, action = key
-        return self.feature_extractor(state) @ self.Z[self.task, action] @ self.w
+        return self.psi(state, action, self.task) @ self.w[self.task]
 
     def _init_Z(self, task: Optional[int] = None) -> None:
         assert task is None or task < self.tasks

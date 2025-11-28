@@ -26,7 +26,7 @@ class QFunction:
         self.z = None
         self._init_z()
 
-    def __getitem__(self, key: Tuple[dict, int]) -> None:
+    def __getitem__(self, key: Tuple[dict, int]) -> float:
         state, action = key
         return self.feature_extractor(state) @ self.z[action]
 
