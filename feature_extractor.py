@@ -48,7 +48,8 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
         self.include_goal = self.config.get_or_raise(include_goal, 'feature_extractor', 'include_goal')
         self.include_direction = self.config.get_or_raise(include_direction, 'feature_extractor', 'include_direction')
 
-        self.grid_size = observation_space['image'].shape[:-1]
+        # remove boarder; Note: assumes env is fully observable
+        self.grid_size = np.array([dim - 2 for dim in observation_space['image'].shape[:-1]])
         self.rbf_grid_size = min(*self.grid_size, self.max_rbf_grid_size)
 
         # calculate feature dimension
@@ -76,7 +77,7 @@ class MinigridFeaturesExtractor(BaseFeaturesExtractor):
         if position is None:
             return None
 
-        normalized_position = position / self.grid_size
+        normalized_position = position / (self.grid_size - 1)
         pos_features = rbf_features(normalized_position, grid_size=self.rbf_grid_size, sigma=self.rbf_sigma)
 
         return pos_features
