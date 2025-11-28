@@ -23,7 +23,7 @@ class Phi:
 
     def __call__(self, state: np.ndarray, action: int, next_state: np.ndarray) -> np.ndarray:
         matches = np.argwhere(state['image'] == self.GOAL_VALUE)
-        agent_on_goal = len(matches) > 0
+        agent_on_goal = len(matches) == 0
 
         return np.array([int(agent_on_goal)])
 
