@@ -24,7 +24,6 @@ class QFunction:
         self.gamma = gamma
 
         self.z = None
-        self._init_z()
 
     def __getitem__(self, key: Tuple[dict, int]) -> float:
         state, action = key
@@ -35,6 +34,9 @@ class QFunction:
             shape=(self.action_space_size, self.feature_extractor.features_dim),
             fill_value=self.initial_q_value,
         )
+
+    def tasks_init(self, tasks: int) -> None:
+        pass
 
     def task_init(self, task: int) -> None:
         self._init_z()
@@ -75,8 +77,6 @@ class QL:
     def __init__(
             self,
             env: gym.Env,
-            tasks: int,
-            time_steps_per_task: int,
             alpha: Optional[float] = None,
             epsilon: Optional[float] = None,
             epsilon_decay: Optional[float] = None,
@@ -88,8 +88,6 @@ class QL:
         self.observation_space = env.observation_space
         self.action_space = env.action_space
         self.env = env
-        self.tasks = tasks
-        self.time_steps_per_task = time_steps_per_task
 
         self.alpha = self.config.get_or_raise(alpha, 'q_learning', 'alpha')
         self.epsilon = self.config.get_or_raise(epsilon, 'q_learning', 'epsilon')
@@ -126,7 +124,7 @@ class QL:
             action = self.Q.get_action(state)
         return action
 
-    def learn_task(self, task: int, time_steps: int) -> None:
+    def _learn_task(self, task: int, time_steps: int) -> None:
         """
         Learning function for Q-Learning
 
@@ -169,14 +167,15 @@ class QL:
 
         self.logger.print_stats()
 
-    def learn(self) -> None:
+    def learn(self, tasks: int, time_steps_per_task: int) -> None:
         """
         Learning function for multitask Q-Learning
 
         :return:
         """
-        for task in range(self.tasks):
-            self.learn_task(task, self.time_steps_per_task)
+        self.Q.tasks_init(tasks)
+        for task in range(tasks):
+            self._learn_task(task, time_steps_per_task)
 
     def predict(self, state: dict) -> tuple[int, None]:
         """

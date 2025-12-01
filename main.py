@@ -10,8 +10,8 @@ from sf_ql.algorithms import SFQL
 
 
 def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
-    model = SFQL(env, tasks=tasks, time_steps_per_task=time_steps_per_task)
-    model.learn()
+    model = SFQL(env)
+    model.learn(tasks=tasks, time_steps_per_task=time_steps_per_task)
     return model
 
 

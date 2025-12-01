@@ -33,7 +33,6 @@ class SFQFunction(QFunction):
             self,
             feature_extractor: MinigridFeaturesExtractor,
             phi: Phi,
-            tasks: int,
             action_space_size: int,
             initial_q_value: float,
             initial_w_value: float,
@@ -43,45 +42,54 @@ class SFQFunction(QFunction):
     ) -> None:
         super(SFQFunction, self).__init__(feature_extractor, action_space_size, initial_q_value, alpha, gamma)
         self.phi = phi
-        self.tasks = tasks
         self.embedding_size = phi.embedding_size
         self.initial_w_value = initial_w_value
         self.alpha_w = alpha_w
 
+        self.tasks = 0
         self.task = None
         self.current_best_task = None
 
         self.z = None   # important to not accidentally rely on it
         self.Z = None
-        self._init_Z()
-
         self.w = None
-        self._init_w()
 
     def __getitem__(self, key: Tuple[dict, int]) -> float:
         state, action = key
         return self.psi(state, action, self.task) @ self.w[self.task]
 
-    def _init_Z(self, task: Optional[int] = None) -> None:
-        assert task is None or task < self.tasks
+    def _init_Z(self, tasks: int) -> None:
+        new_z = np.full(
+            shape=(tasks, self.action_space_size, self.feature_extractor.features_dim, self.embedding_size),
+            fill_value=self.initial_q_value,
+        )
+        if self.Z is None:
+            self.Z = new_z
+        else:
+            self.Z = np.concatenate((self.Z, new_z))
 
-        if task is None:
-            self.Z = np.full(
-                shape=(self.tasks, self.action_space_size, self.feature_extractor.features_dim, self.embedding_size),
-                fill_value=self.initial_q_value,
-            )
-        elif task > 0:
+    def _task_init_Z(self, task: Optional[int] = None) -> None:
+        if task > 0:
             self.Z[task] = self.Z[task - 1]
 
-    def _init_w(self) -> None:
-        self.w = np.full(
-            shape=(self.tasks, self.embedding_size,),
+    def _init_w(self, tasks: int) -> None:
+        new_w = np.full(
+            shape=(tasks, self.embedding_size,),
             fill_value=self.initial_w_value,
         )
+        if self.w is None:
+            self.w = new_w
+        else:
+            self.w = np.concatenate((self.w, new_w))
+
+    def tasks_init(self, tasks: int) -> None:
+        self.tasks += tasks
+        self._init_Z(tasks)
+        self._init_w(tasks)
 
     def task_init(self, task: int) -> None:
         self.task = task
-        self._init_Z(task)
+        self._task_init_Z(task)
 
     def step_init(self, state: dict, step: int) -> None:
         self.current_best_task = self.get_best_task(state)
@@ -245,7 +253,6 @@ class SFQL(QL):
         self.Q = SFQFunction(
             feature_extractor=MinigridFeaturesExtractor(self.observation_space),
             phi=Phi(),
-            tasks=self.tasks,
             action_space_size=self.action_space.n,
             initial_q_value=self.initial_q_value,
             initial_w_value=self.initial_w_value,
