@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 from typing import SupportsFloat, Optional
 
-from config import Config
+from sf_ql.config import Config
 
 
 @dataclass

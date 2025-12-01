@@ -5,7 +5,7 @@ import minigrid.core.constants as minigrid_constants
 import numpy as np
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
-from config import Config
+from sf_ql.config import Config
 
 
 def rbf_features(position: np.ndarray, grid_size: int = 10, sigma: float = 0.1) -> np.ndarray:

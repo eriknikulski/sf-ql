@@ -3,9 +3,9 @@ from typing import Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from config import Config
-from feature_extractor import MinigridFeaturesExtractor
-from logger import Logger
+from sf_ql.config import Config
+from sf_ql.utils.feature_extractor import MinigridFeaturesExtractor
+from sf_ql.utils.logger import Logger
 
 
 class QFunction:

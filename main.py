@@ -3,10 +3,10 @@ from minigrid.wrappers import SymbolicObsWrapper
 
 import simple_minigrid
 
-from config import Config
-from logger import Logger
-from q_learning import QL
-from sfq_learning import SFQL
+from sf_ql.config import Config
+from sf_ql.utils.logger import Logger
+from sf_ql.algorithms import QL
+from sf_ql.algorithms import SFQL
 
 
 def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):

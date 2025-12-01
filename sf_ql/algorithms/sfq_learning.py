@@ -3,9 +3,9 @@ from typing import Optional, Tuple
 import minigrid.core.constants as minigrid_constants
 import numpy as np
 
-from config import Config
-from feature_extractor import MinigridFeaturesExtractor
-from q_learning import QL, QFunction
+from sf_ql.config import Config
+from sf_ql.utils.feature_extractor import MinigridFeaturesExtractor
+from sf_ql.algorithms.q_learning import QL, QFunction
 
 
 class Phi:
