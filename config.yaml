@@ -3,8 +3,8 @@ logger:
   log_interval: 10
 
 setting:
-  env_id: MiniGrid-Empty-5x5-v0
-#  env_id: MiniGrid-FourRooms-v0
+  env_id: SimpleMiniGrid-Empty-5x5-v0
+#  env_id: SimpleMiniGrid-Reward-5x5-v0
   render_mode: rgb_array
 #  render_mode: human
   eval_steps: 1_000

@@ -1,8 +1,9 @@
 import gymnasium as gym
 from minigrid.wrappers import SymbolicObsWrapper
 
+import simple_minigrid
+
 from config import Config
-from wrappers import NonDirectionWrapper
 from logger import Logger
 from q_learning import QL
 from sfq_learning import SFQL
@@ -44,7 +45,6 @@ def main():
 
     env = gym.make(env_id, max_episode_steps=max_episode_steps, render_mode=render_mode)
     env = SymbolicObsWrapper(env)
-    env = NonDirectionWrapper(env)
 
     policy = learn_policy(
         env,
