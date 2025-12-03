@@ -16,9 +16,10 @@ def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
 
 
 def eval_policy(env: gym.Env, policy, time_steps: int):
-    logger = Logger()
+    logger = Logger(evaluation=True)
     logger.log_interval = None
     logger.log_message('\nStarting evaluation...')
+    logger.new_task(task_id=0)
     logger.new_episode()
 
     # TODO: think about which task the evaluation should run
@@ -33,7 +34,7 @@ def eval_policy(env: gym.Env, policy, time_steps: int):
             observation, info = env.reset()
             logger.new_episode()
 
-    logger.print_stats()
+    logger.print_task_stats()
 
 
 def main():

@@ -152,7 +152,7 @@ class QL:
             next_state, reward, terminated, truncated, info = self.env.step(action)
             if self.use_sf_paper_reward:
                 reward = float(reward > 0)
-            self.logger.log(reward=reward)
+            self.logger.log(reward=reward, epsilon=self.epsilon, alpha=self.alpha)
 
             if terminated or truncated:
                 gamma = 0
@@ -165,7 +165,7 @@ class QL:
 
             state = next_state
 
-        self.logger.print_stats()
+        self.logger.print_task_stats()
 
     def learn(self, tasks: int, time_steps_per_task: int) -> None:
         """
@@ -175,6 +175,7 @@ class QL:
         """
         self.Q.tasks_init(tasks)
         for task in range(tasks):
+            self.logger.new_task(task)
             self._learn_task(task, time_steps_per_task)
 
     def predict(self, state: dict) -> tuple[int, None]:

@@ -10,9 +10,11 @@ Paper: "Successor Features for Transfer in Reinforcement Learning" - Barreto et 
 
 Note: each task is specified by its index and used by `env.reset(seed=task)`
 
+### Tensorboard
+
+Start tensorboard with: `python -m tensorboard.main --logdir=runs`
+
 TODOS:
 
-- [ ] Currently, all RewardObjects are the same in the representation -> FIX!
 - [ ] QL and SFQL on bigger ENVs?
-- [ ] add plots / tensorboard
 - [ ] Black code formater?
