@@ -1,3 +1,0 @@
-[submodule "external/simple-minigrid"]
-	path = external/simple-minigrid
-	url = git@github.com:eriknikulski/simple-minigrid.git
