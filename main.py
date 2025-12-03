@@ -1,7 +1,7 @@
 import gymnasium as gym
-from minigrid.wrappers import SymbolicObsWrapper
 
 import simple_minigrid
+from simple_minigrid.wrappers import SymbolicObsWrapper
 
 from sf_ql.config import Config
 from sf_ql.utils.logger import Logger
