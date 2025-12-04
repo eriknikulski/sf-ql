@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+import gymnasium as gym
 import minigrid.core.constants as minigrid_constants
 import numpy as np
 
@@ -238,14 +239,34 @@ class SFQFunction(QFunction):
 class SFQL(QL):
     def __init__(
             self,
-            *args,
+            env: gym.Env,
+            alpha: Optional[float] = None,
             alpha_w: Optional[float] = None,
+            epsilon: Optional[float] = None,
+            epsilon_decay: Optional[float] = None,
+            epsilon_lower_bound: Optional[float] = None,
+            gamma: Optional[float] = None,
+            initial_q_value: Optional[float] = None,
             initial_w_value: Optional[float] = None,
-            **kwargs,
     ) -> None:
-        super(SFQL, self).__init__(*args, **kwargs)
-
         self.config = Config()
+
+        alpha = self.config.get_or_raise(alpha, 'sfq_learning', 'alpha')
+        epsilon = self.config.get_or_raise(epsilon, 'sfq_learning', 'epsilon')
+        epsilon_decay = self.config.get_or_raise(epsilon_decay, 'sfq_learning', 'epsilon_decay')
+        epsilon_lower_bound = self.config.get_or_raise(epsilon_lower_bound, 'sfq_learning', 'epsilon_lower_bound')
+        gamma = self.config.get_or_raise(gamma, 'sfq_learning', 'gamma')
+        initial_q_value = self.config.get_or_raise(initial_q_value, 'sfq_learning', 'initial_q_value')
+
+        super(SFQL, self).__init__(
+            env=env,
+            alpha=alpha,
+            epsilon=epsilon,
+            epsilon_decay=epsilon_decay,
+            epsilon_lower_bound=epsilon_lower_bound,
+            gamma=gamma,
+            initial_q_value=initial_q_value,
+        )
 
         self.alpha_w = self.config.get_or_raise(alpha_w, 'sfq_learning', 'alpha_w')
         self.initial_w_value = self.config.get_or_raise(initial_w_value, 'sfq_learning', 'initial_w_value')
