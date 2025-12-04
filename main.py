@@ -4,7 +4,6 @@ import simple_minigrid
 from simple_minigrid.wrappers import SymbolicObsWrapper
 
 from sf_ql.config import Config
-from sf_ql.utils.logger import Logger
 from sf_ql.algorithms import QL
 from sf_ql.algorithms import SFQL
 
@@ -13,28 +12,6 @@ def learn_policy(env: gym.Env, tasks: int, time_steps_per_task: int):
     model = SFQL(env)
     model.learn(tasks=tasks, time_steps_per_task=time_steps_per_task)
     return model
-
-
-def eval_policy(env: gym.Env, policy, time_steps: int):
-    logger = Logger(evaluation=True)
-    logger.log_interval = None
-    logger.log_message('\nStarting evaluation...')
-    logger.new_task(task_id=0)
-    logger.new_episode()
-
-    # TODO: think about which task the evaluation should run
-    observation, info = env.reset(seed=42)
-
-    for _ in range(time_steps):
-        action, _ = policy.predict(observation)
-        observation, reward, terminated, truncated, info = env.step(action)
-        logger.log(reward=reward)
-
-        if terminated or truncated:
-            observation, info = env.reset()
-            logger.new_episode()
-
-    logger.print_task_stats()
 
 
 def main():
@@ -52,9 +29,6 @@ def main():
         tasks=config.setting.tasks,
         time_steps_per_task=config.setting.time_steps_per_task,
     )
-
-    eval_steps = config.setting.eval_steps
-    eval_policy(env, policy, time_steps=eval_steps)
 
     env.close()
 

@@ -6,6 +6,7 @@ import numpy as np
 from sf_ql.config import Config
 from sf_ql.utils.feature_extractor import MinigridFeaturesExtractor
 from sf_ql.utils.logger import Logger
+from simple_minigrid.wrappers import SymbolicObsWrapper
 
 
 class QFunction:
@@ -138,6 +139,7 @@ class QL:
         :param time_steps: number of time steps
         :return:
         """
+        self.logger.new_task(task)
         task_vec = self.get_task_vec(task)
         if len(task_vec) > 1:
             self.logger.log_message(f'Task {task} has rewards {task_vec}')
@@ -177,6 +179,26 @@ class QL:
 
         self.logger.print_task_stats()
 
+    def _evaluate_task(self, task: int) -> None:
+        env_id = self.config.setting.env_id
+        render_mode = self.config.evaluation.render_mode
+        episodes = self.config.evaluation.episodes
+        max_episode_steps = self.config.setting.max_episode_steps
+
+        env = gym.make(env_id, max_episode_steps=max_episode_steps, render_mode=render_mode)
+        env = SymbolicObsWrapper(env)
+
+        for episode in range(episodes):
+            state, _ = env.reset(seed=task)
+
+            for step in range(max_episode_steps):
+                action = self.Q.get_action(state)
+                next_state, reward, terminated, truncated, info = env.step(action)
+                state = next_state
+
+                if terminated or truncated:
+                    break
+
     def learn(self, tasks: int, time_steps_per_task: int) -> None:
         """
         Learning function for multitask Q-Learning
@@ -185,8 +207,8 @@ class QL:
         """
         self.Q.tasks_init(tasks)
         for task in range(tasks):
-            self.logger.new_task(task)
             self._learn_task(task, time_steps_per_task)
+            self._evaluate_task(task)
 
     def predict(self, state: dict) -> tuple[int, None]:
         """

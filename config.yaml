@@ -9,9 +9,13 @@ setting:
 #  render_mode: human
   eval_steps: 1_000
   use_sf_paper_reward: True   # 1 if goal reached
-  max_episode_steps: 20
+  max_episode_steps: 50
   tasks: 2
   time_steps_per_task: 1_000
+
+evaluation:
+  render_mode: human
+  episodes: 10
 
 q_learning:
   alpha: 0.001
@@ -30,7 +34,7 @@ sfq_learning:
   gamma: 0.95
   initial_q_value: 0.01
   initial_w_value: 0.01
-  learn_w: True
+  learn_w: False
 
 feature_extractor:
   max_rbf_grid_size: 10
