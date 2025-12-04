@@ -159,13 +159,12 @@ class QL:
                 action = self.get_epsilon_greedy_action(state)
 
                 next_state, reward, terminated, truncated, info = self.env.step(action)
-                if self.use_sf_paper_reward:
-                    reward = float(reward > 0)
+                if self.use_sf_paper_reward and terminated:
+                    reward = float(reward > 0)      # 1 if agent reaches goal
 
                 self.logger.log(reward=reward, epsilon=self.epsilon, alpha=self.alpha)
 
                 gamma = 0 if terminated or truncated else self.gamma
-
                 self.Q.update(state, action, float(reward), next_state, gamma=gamma)
 
                 # decay parameter
