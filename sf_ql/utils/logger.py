@@ -10,6 +10,11 @@ from torch.utils.tensorboard import SummaryWriter
 from sf_ql.config import Config
 
 
+# TODO:
+#  - log only at the end of an episode to TensorBoard
+#  - log evaluation metrics, not necessarily training metrics (no exploration for eval)
+#  - use context manager or something to improve logging
+
 @dataclass
 class EpisodeStats:
     rewards: List[float] = field(default_factory=list)
@@ -39,12 +44,12 @@ class Stats:
         return sum(task.return_ for task in self.tasks)
 
     @property
-    def episodes(self) -> int:
+    def num_episodes(self) -> int:
         return sum(len(task.episodes) for task in self.tasks)
 
     @property
     def avg_return(self) -> float:
-        return sum(episode.return_ for task in self.tasks for episode in task.episodes) / self.episodes
+        return self.return_ / self.num_episodes
 
 
 class Logger:
