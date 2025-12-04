@@ -132,38 +132,39 @@ class QL:
         :param time_steps: number of time steps
         :return:
         """
-        new_episode = True
-        state, _ = self.env.reset(seed=task)
-
         self.Q.task_init(task)
 
-        for step in range(time_steps):
-            gamma = self.gamma
+        steps_used = 0
 
-            if new_episode:
-                new_episode = False
-                state, _ = self.env.reset(seed=task)
-                self.logger.new_episode()
+        while steps_used < time_steps:
 
-            self.Q.step_init(state, step)
+            # run episode
+            state, _ = self.env.reset(seed=task)
+            self.logger.new_episode()
 
-            action = self.get_epsilon_greedy_action(state)
+            for episode_step in range(time_steps - steps_used):
+                self.Q.step_init(state, steps_used)
 
-            next_state, reward, terminated, truncated, info = self.env.step(action)
-            if self.use_sf_paper_reward:
-                reward = float(reward > 0)
-            self.logger.log(reward=reward, epsilon=self.epsilon, alpha=self.alpha)
+                action = self.get_epsilon_greedy_action(state)
 
-            if terminated or truncated:
-                gamma = 0
-                new_episode = True
+                next_state, reward, terminated, truncated, info = self.env.step(action)
+                if self.use_sf_paper_reward:
+                    reward = float(reward > 0)
 
-            self.Q.update(state, action, float(reward), next_state, gamma=gamma)
+                self.logger.log(reward=reward, epsilon=self.epsilon, alpha=self.alpha)
 
-            # decay parameter
-            self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_lower_bound)
+                gamma = 0 if terminated or truncated else self.gamma
 
-            state = next_state
+                self.Q.update(state, action, float(reward), next_state, gamma=gamma)
+
+                # decay parameter
+                self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_lower_bound)
+
+                state = next_state
+                steps_used += 1
+
+                if terminated or truncated or steps_used >= time_steps:
+                    break
 
         self.logger.print_task_stats()
 
