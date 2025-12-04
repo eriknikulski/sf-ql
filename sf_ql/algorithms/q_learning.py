@@ -38,7 +38,7 @@ class QFunction:
     def tasks_init(self, tasks: int) -> None:
         pass
 
-    def task_init(self, task: int) -> None:
+    def task_init(self, task: int, task_vec: np.ndarray) -> None:
         self._init_z()
 
     def step_init(self, state: dict, step: int) -> None:
@@ -124,6 +124,12 @@ class QL:
             action = self.Q.get_action(state)
         return action
 
+    def get_task_vec(self, task: int) -> np.ndarray:
+        _, _ = self.env.reset(seed=task)
+        if hasattr(self.env.unwrapped, 'rewards'):
+            return np.append(self.env.unwrapped.rewards, 1)
+        return np.array([1])
+
     def _learn_task(self, task: int, time_steps: int) -> None:
         """
         Learning function for Q-Learning
@@ -132,7 +138,10 @@ class QL:
         :param time_steps: number of time steps
         :return:
         """
-        self.Q.task_init(task)
+        task_vec = self.get_task_vec(task)
+        if len(task_vec) > 1:
+            self.logger.log_message(f'Task {task} has rewards {task_vec}')
+        self.Q.task_init(task, task_vec=task_vec)
 
         steps_used = 0
 

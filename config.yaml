@@ -4,14 +4,13 @@ logger:
   autostart_tensorboard: False
 
 setting:
-  env_id: SimpleMiniGrid-Empty-5x5-v0
-#  env_id: SimpleMiniGrid-Reward-5x5-v0
+  env_id: SimpleMiniGrid-Reward-8x8-v0
   render_mode: rgb_array
 #  render_mode: human
   eval_steps: 1_000
   use_sf_paper_reward: True   # 1 if goal reached
   max_episode_steps: 20
-  tasks: 1
+  tasks: 2
   time_steps_per_task: 1_000
 
 q_learning:
@@ -31,9 +30,10 @@ sfq_learning:
   gamma: 0.95
   initial_q_value: 0.01
   initial_w_value: 0.01
+  learn_w: True
 
 feature_extractor:
-  max_rbf_grid_size: 3
+  max_rbf_grid_size: 10
   rbf_sigma: 0.1
   include_goal: False
   include_direction: False

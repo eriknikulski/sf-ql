@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 import gymnasium as gym
-import minigrid.core.constants as minigrid_constants
+import simple_minigrid.core.constants as simple_minigrid_constants
 import numpy as np
 
 from sf_ql.config import Config
@@ -17,16 +17,25 @@ class Phi:
         since the agent is detected to be on the goal when the goal is not visible.
         (The agent occludes the goal)
     """
-    GOAL_VALUE = minigrid_constants.OBJECT_TO_IDX['goal']
+    GOAL_VALUE = simple_minigrid_constants.OBJECT_TO_IDX['goal']
+    REWARD_CLASS_VALUES = simple_minigrid_constants.CLASSED_REWARD_OBJECTS
 
-    def __init__(self) -> None:
-        self.embedding_size = 1
+    def __init__(self, reward_classes: int) -> None:
+        self.reward_classes = reward_classes
+        self.embedding_size = 1 + self.reward_classes
 
     def __call__(self, state: dict, action: int, next_state: dict) -> np.ndarray:
         matches = np.argwhere(next_state['image'] == self.GOAL_VALUE)
-        agent_on_goal = len(matches) == 0
+        agent_on_goal = int(len(matches) == 0)
 
-        return np.array([int(agent_on_goal)])
+        agent_on_rewards = [0] * self.reward_classes
+        for i in range(self.reward_classes):
+            value = self.REWARD_CLASS_VALUES[f'reward_object_{i}']
+            current_matches = np.argwhere(state['image'] == value)
+            next_matches = np.argwhere(next_state['image'] == value)
+            agent_on_rewards[i] = int(len(current_matches) != len(next_matches))
+
+        return np.array([*agent_on_rewards, agent_on_goal])
 
 
 class SFQFunction(QFunction):
@@ -40,12 +49,14 @@ class SFQFunction(QFunction):
             alpha: float,
             alpha_w: float,
             gamma: float,
+            learn_w: bool,
     ) -> None:
         super(SFQFunction, self).__init__(feature_extractor, action_space_size, initial_q_value, alpha, gamma)
         self.phi = phi
         self.embedding_size = phi.embedding_size
         self.initial_w_value = initial_w_value
         self.alpha_w = alpha_w
+        self.learn_w = learn_w
 
         self.tasks = 0
         self.task = None
@@ -88,9 +99,12 @@ class SFQFunction(QFunction):
         self._init_Z(tasks)
         self._init_w(tasks)
 
-    def task_init(self, task: int) -> None:
+    def task_init(self, task: int, task_vec: np.ndarray) -> None:
         self.task = task
         self._task_init_Z(task)
+
+        if not self.learn_w:
+            self.w[self.task] = task_vec
 
     def step_init(self, state: dict, step: int) -> None:
         self.current_best_task = self.get_best_task(state)
@@ -100,6 +114,10 @@ class SFQFunction(QFunction):
             task = self.task
 
         return self.feature_extractor(state) @ self.Z[task, action]
+
+    def _td_update_w(self,state: dict, action: int, reward: float, next_state: dict) -> None:
+        phi_vec = self.phi(state, action, next_state)
+        self.w[self.task] += self.alpha_w * (reward - phi_vec @ self.w[self.task]) * phi_vec
 
     def _td_update_Z(
             self,
@@ -130,8 +148,8 @@ class SFQFunction(QFunction):
             gamma = self.gamma
 
         # update task vector w
-        phi_vec = self.phi(state, action, next_state)
-        self.w[self.task] += self.alpha_w * (reward - phi_vec @ self.w[self.task]) * phi_vec
+        if self.learn_w:
+            self._td_update_w(state, action, reward, next_state)
 
         # update Z[t, a]
         next_action, _ = self.get_best_action(next_state)
@@ -248,6 +266,7 @@ class SFQL(QL):
             gamma: Optional[float] = None,
             initial_q_value: Optional[float] = None,
             initial_w_value: Optional[float] = None,
+            learn_w: Optional[bool] = None,
     ) -> None:
         self.config = Config()
 
@@ -270,14 +289,20 @@ class SFQL(QL):
 
         self.alpha_w = self.config.get_or_raise(alpha_w, 'sfq_learning', 'alpha_w')
         self.initial_w_value = self.config.get_or_raise(initial_w_value, 'sfq_learning', 'initial_w_value')
+        self.learn_w = self.config.get_or_raise(learn_w, 'sfq_learning', 'learn_w')
+
+        reward_classes = 0
+        if hasattr(env.unwrapped, 'num_object_classes'):
+            reward_classes = env.unwrapped.num_object_classes
 
         self.Q = SFQFunction(
             feature_extractor=MinigridFeaturesExtractor(self.observation_space),
-            phi=Phi(),
+            phi=Phi(reward_classes=reward_classes),
             action_space_size=self.action_space.n,
             initial_q_value=self.initial_q_value,
             initial_w_value=self.initial_w_value,
             alpha=self.alpha,
             alpha_w=self.alpha_w,
             gamma=self.gamma,
+            learn_w=self.learn_w,
         )
